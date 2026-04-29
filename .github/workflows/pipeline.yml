@@ -34,13 +34,11 @@ jobs:
           cd backend
           pip install -r requirements.txt
 
-      - name: Create .env for backend
+      - name: Create backend .env
         run: |
-          cd backend
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
-          echo "SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          cat > backend/.env << 'EOF'
+          ${{ secrets.BACKEND_ENV }}
+          EOF
 
       - name: Lint with flake8
         run: |
@@ -48,7 +46,7 @@ jobs:
           cd backend
           flake8 . --max-line-length=120 --exclude=__pycache__,utils
 
-      - name: Run backend tests (if any)
+      - name: Run backend tests
         run: |
           cd backend
           python -m pytest --ignore=utils || echo "No tests found, skipping"
@@ -76,14 +74,11 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Create .env for frontend
+      - name: Create frontend .env.local
         run: |
-          cd frontend
-          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env.local
-          echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}" >> .env.local
-          echo "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" >> .env.local
+          cat > frontend/.env.local << 'EOF'
+          ${{ secrets.FRONTEND_ENV }}
+          EOF
 
       - name: Lint
         run: |
@@ -97,7 +92,6 @@ jobs:
 
   # ─────────────────────────────────────────
   # JOB 3: Deploy Backend to VPS
-  # (only runs after backend-ci passes, on main branch)
   # ─────────────────────────────────────────
   deploy-backend:
     name: Deploy Backend
@@ -119,24 +113,20 @@ jobs:
             git pull origin main
 
             # Write .env file on server
-            cat > .env <<EOF
-            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-            SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            cat > .env << 'EOF'
+            ${{ secrets.BACKEND_ENV }}
             EOF
 
             # Install dependencies
             pip install -r requirements.txt
 
-            # Restart FastAPI (using systemd or pm2)
+            # Restart FastAPI
             sudo systemctl restart fastapi
             # OR if using pm2:
             # pm2 restart fastapi-app
 
   # ─────────────────────────────────────────
   # JOB 4: Deploy Frontend to Vercel
-  # (only runs after frontend-ci passes, on main branch)
   # ─────────────────────────────────────────
   deploy-frontend:
     name: Deploy Frontend
@@ -147,6 +137,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Create frontend .env.local
+        run: |
+          cat > frontend/.env.local << 'EOF'
+          ${{ secrets.FRONTEND_ENV }}
+          EOF
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
