@@ -1,4 +1,4 @@
-# Supply Chain Logistics & Shipment Tracking
+# LogisticsPro
 
 A full-stack application for managing and tracking shipments, warehouses, and carriers.
 
