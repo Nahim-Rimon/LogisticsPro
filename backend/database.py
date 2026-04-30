@@ -14,3 +14,5 @@ supabase: Client = create_client(url, key)
 
 def get_supabase():
     return supabase
+
+#using supabase
