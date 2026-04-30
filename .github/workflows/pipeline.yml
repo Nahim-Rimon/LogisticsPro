@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ─────────────────────────────────────────
-  # JOB 1: Test & Lint Backend (FastAPI)
+  # JOB 1: Backend CI
   # ─────────────────────────────────────────
   backend-ci:
     name: Backend CI
@@ -52,7 +52,7 @@ jobs:
           python -m pytest --ignore=utils || echo "No tests found, skipping"
 
   # ─────────────────────────────────────────
-  # JOB 2: Build & Lint Frontend (Next.js)
+  # JOB 2: Frontend CI
   # ─────────────────────────────────────────
   frontend-ci:
     name: Frontend CI
@@ -85,51 +85,42 @@ jobs:
           cd frontend
           npm run lint
 
-      - name: Build Next.js app
+      - name: Build Next.js
         run: |
           cd frontend
           npm run build
 
   # ─────────────────────────────────────────
-  # JOB 3: Deploy Backend to VPS
+  # JOB 3: Deploy Backend to Vercel
   # ─────────────────────────────────────────
   deploy-backend:
-    name: Deploy Backend
+    name: Deploy Backend to Vercel
     needs: backend-ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Deploy FastAPI via SSH
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/yourproject/backend
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            # Pull latest code
-            git pull origin main
+      - name: Install Vercel CLI
+        run: npm install -g vercel
 
-            # Write .env file on server
-            cat > .env << 'EOF'
-            ${{ secrets.BACKEND_ENV }}
-            EOF
-
-            # Install dependencies
-            pip install -r requirements.txt
-
-            # Restart FastAPI
-            sudo systemctl restart fastapi
-            # OR if using pm2:
-            # pm2 restart fastapi-app
+      - name: Deploy Backend to Vercel
+        run: |
+          cd backend
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_BACKEND_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
 
   # ─────────────────────────────────────────
   # JOB 4: Deploy Frontend to Vercel
   # ─────────────────────────────────────────
   deploy-frontend:
-    name: Deploy Frontend
+    name: Deploy Frontend to Vercel
     needs: frontend-ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -138,17 +129,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create frontend .env.local
-        run: |
-          cat > frontend/.env.local << 'EOF'
-          ${{ secrets.FRONTEND_ENV }}
-          EOF
+      - name: Install Vercel CLI
+        run: npm install -g vercel
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: frontend
+      - name: Deploy Frontend to Vercel
+        run: |
+          cd frontend
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_FRONTEND_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
