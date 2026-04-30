@@ -91,29 +91,32 @@ jobs:
   # JOB 3: Deploy Backend to Vercel
   # ─────────────────────────────────────────
   deploy-backend:
-    name: Deploy Backend to Vercel
-    needs: backend-ci
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      name: Deploy Backend to Vercel
+      needs: backend-ci
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+        - name: Install uv
+          run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel
+        - name: Add uv to PATH
+          run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Deploy Backend to Vercel
-        run: |
-          cd backend
-          npm install -g vercel@latest
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_BACKEND_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
-          PIP_REQUIRE_VIRTUALENV: "false"
+        - name: Install Vercel CLI
+          run: npm install -g vercel@latest
+
+        - name: Deploy to Vercel
+          run: |
+            cd backend
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          env:
+            VERCEL_ORG_ID: ${{ secrets.VERCEL_BACKEND_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
 
   # ─────────────────────────────────────────
   # JOB 4: Deploy Frontend to Vercel
