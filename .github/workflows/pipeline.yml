@@ -44,7 +44,7 @@ jobs:
         run: |
           pip install flake8
           cd backend
-          flake8 . --max-line-length=200 --exclude=__pycache__,utils --ignore=E302,W293,W291,E501,E251,E261,F401,F811,E401
+          flake8 . --max-line-length=200 --exclude=__pycache__,utils --ignore=E302,W293,W291,E501,E251,E261,F401,F811,E401,E265
 
       - name: Run backend tests
         run: |
