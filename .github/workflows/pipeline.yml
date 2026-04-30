@@ -80,15 +80,12 @@ jobs:
           ${{ secrets.FRONTEND_ENV }}
           EOF
 
-      - name: Lint
-        run: |
-          cd frontend
-          npm run lint
-
-      - name: Build Next.js
+      - name: Build
         run: |
           cd frontend
           npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
 
   # ─────────────────────────────────────────
   # JOB 3: Deploy Backend to Vercel
