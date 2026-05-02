@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Globe } from "lucide-react";
@@ -33,18 +34,7 @@ const tiers = [
 export default function PricingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-bg text-text-primary animate-slide-up-fade">
-      <header className="sticky top-0 z-50 px-6 lg:px-8 h-16 flex items-center justify-between border-b border-border/40 bg-bg/70 backdrop-blur-xl">
-        <Link className="flex items-center gap-2" href="/">
-          <div className="bg-accent/10 p-1.5 rounded-md">
-            <Globe className="h-5 w-5 text-accent" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">LogisticsPro</span>
-        </Link>
-        <div className="flex gap-4">
-          <Button render={<Link href="/sign-in" />} nativeButton={false} variant="ghost" size="sm">Sign In</Button>
-          <Button render={<Link href="/sign-up" />} nativeButton={false} size="sm">Get Started</Button>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-1 py-20 px-6">
         <div className="max-w-7xl mx-auto">
