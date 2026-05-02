@@ -55,9 +55,15 @@ export default function ShipmentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoading(false);
+      return;
+    }
+
     async function loadData() {
       try {
         const token = await getToken();
@@ -78,7 +84,7 @@ export default function ShipmentsPage() {
     }
 
     loadData();
-  }, [getToken]);
+  }, [getToken, isLoaded, isSignedIn]);
 
   const handleAddShipment = async (e: React.FormEvent) => {
     e.preventDefault();
