@@ -10,7 +10,8 @@ export default function SignInPage() {
             card: 'shadow-none border border-border rounded-2xl',
           }
         }}
-        signUpUrl="/sign-up" 
+        signUpUrl="/sign-up"
+        fallbackRedirectUrl="/dashboard"
       />
     </div>
   );

@@ -20,9 +20,15 @@ export default function RoutePlannerPage() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState<any>(null);
 
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoading(false);
+      return;
+    }
+
     async function loadShipments() {
       try {
         const token = await getToken();
@@ -37,7 +43,7 @@ export default function RoutePlannerPage() {
       }
     }
     loadShipments();
-  }, [getToken]);
+  }, [getToken, isLoaded, isSignedIn]);
 
   const toggleSelection = (id: string) => {
     const next = new Set(selectedIds);

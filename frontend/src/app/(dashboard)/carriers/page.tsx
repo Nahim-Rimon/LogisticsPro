@@ -49,9 +49,15 @@ export default function CarriersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoading(false);
+      return;
+    }
+
     async function loadCarriers() {
       try {
         const token = await getToken();
@@ -66,7 +72,7 @@ export default function CarriersPage() {
     }
 
     loadCarriers();
-  }, [getToken]);
+  }, [getToken, isLoaded, isSignedIn]);
 
   const handleAddCarrier = async (e: React.FormEvent) => {
     e.preventDefault();

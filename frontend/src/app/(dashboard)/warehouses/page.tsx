@@ -47,9 +47,15 @@ export default function WarehousesPage() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [forecast, setForecast] = useState<any>(null);
   const [isForecasting, setIsForecasting] = useState(false);
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoading(false);
+      return;
+    }
+
     async function loadWarehouses() {
       try {
         const token = await getToken();
@@ -64,7 +70,7 @@ export default function WarehousesPage() {
     }
 
     loadWarehouses();
-  }, [getToken]);
+  }, [getToken, isLoaded, isSignedIn]);
 
   const handleAddWarehouse = async (e: React.FormEvent) => {
     e.preventDefault();

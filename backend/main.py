@@ -5,7 +5,6 @@ from models import (
     Warehouse, WarehouseCreate, 
     Carrier, CarrierCreate, 
     Shipment, ShipmentCreate, ShipmentEvent, ShipmentEventCreate, ShipmentEventBase,
-    Shipment, ShipmentCreate, ShipmentEvent, ShipmentEventCreate, ShipmentEventBase,
     ChatRequest, ChatResponse, ForecastResponse,
     RouteOptimizationRequest, RouteOptimizationResponse, RouteWaypoint
 )
@@ -114,7 +113,7 @@ async def create_warehouse(
     user = Depends(get_current_user)
 ):
     check_role(user, "admin")
-    response = db.table("warehouses").insert(warehouse.dict()).execute()
+    response = db.table("warehouses").insert(warehouse.model_dump(mode='json')).execute()
     return response.data[0]
 
 @app.post("/warehouses/{warehouse_id}/forecast", response_model=ForecastResponse)
@@ -190,7 +189,7 @@ async def create_carrier(
     user = Depends(get_current_user)
 ):
     check_role(user, "admin")
-    response = db.table("carriers").insert(carrier.dict()).execute()
+    response = db.table("carriers").insert(carrier.model_dump(mode='json')).execute()
     return response.data[0]
 
 # Shipments
@@ -218,7 +217,7 @@ async def create_shipment(
     user = Depends(get_current_user)
 ):
     # Only admins, warehouse managers, or suppliers can create shipments
-    response = db.table("shipments").insert(shipment.dict()).execute()
+    response = db.table("shipments").insert(shipment.model_dump(mode='json', exclude={'delay_risk', 'delay_reason'})).execute()
     return response.data[0]
 
 @app.post("/shipments/optimize-route", response_model=RouteOptimizationResponse)
@@ -319,7 +318,7 @@ async def add_shipment_event(
     db = Depends(get_supabase),
     user = Depends(get_current_user)
 ):
-    event_data = event.dict()
+    event_data = event.model_dump(mode='json')
     event_data["shipment_id"] = str(shipment_id)
     
     # Update shipment status as well

@@ -44,23 +44,37 @@ const statusColors: Record<string, string> = {
 
 export default function ShipmentsPage() {
   const [shipments, setShipments] = useState<any[]>([]);
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [carriers, setCarriers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<any | null>(null);
-  const [newShipment, setNewShipment] = useState({ tracking_number: "", status: "Pending" });
+  const [newShipment, setNewShipment] = useState({ tracking_number: "", status: "Pending", origin_id: "", destination_id: "", carrier_id: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   useEffect(() => {
-    async function loadShipments() {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoading(false);
+      return;
+    }
+
+    async function loadData() {
       try {
         const token = await getToken();
-        const data = await fetchWithAuth('/shipments', token);
-        setShipments(data);
+        const [shipmentsData, warehousesData, carriersData] = await Promise.all([
+          fetchWithAuth('/shipments', token),
+          fetchWithAuth('/warehouses', token),
+          fetchWithAuth('/carriers', token)
+        ]);
+        setShipments(shipmentsData);
+        setWarehouses(warehousesData);
+        setCarriers(carriersData);
       } catch (err: any) {
         console.error(err);
         setError(err.message);
@@ -69,21 +83,41 @@ export default function ShipmentsPage() {
       }
     }
 
-    loadShipments();
-  }, [getToken]);
+    loadData();
+  }, [getToken, isLoaded, isSignedIn]);
 
   const handleAddShipment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const token = await getToken();
+      
+      const payload = {
+        ...newShipment,
+        origin_id: newShipment.origin_id || undefined,
+        destination_id: newShipment.destination_id || undefined,
+        carrier_id: newShipment.carrier_id || undefined
+      };
+      
       const addedShipment = await fetchWithAuth('/shipments', token, {
         method: 'POST',
-        body: JSON.stringify(newShipment),
+        body: JSON.stringify(payload),
       });
-      setShipments([...shipments, addedShipment]);
+      
+      const origin = warehouses.find(w => w.id === addedShipment.origin_id);
+      const destination = warehouses.find(w => w.id === addedShipment.destination_id);
+      const carrier = carriers.find(c => c.id === addedShipment.carrier_id);
+      
+      const enrichedShipment = {
+        ...addedShipment,
+        origin: origin || null,
+        destination: destination || null,
+        carrier: carrier || null
+      };
+
+      setShipments([...shipments, enrichedShipment]);
       setIsAddOpen(false);
-      setNewShipment({ tracking_number: "", status: "Pending" });
+      setNewShipment({ tracking_number: "", status: "Pending", origin_id: "", destination_id: "", carrier_id: "" });
     } catch (err: any) {
       console.error(err);
       alert(err.message);
@@ -123,6 +157,60 @@ export default function ShipmentsPage() {
                       required 
                       placeholder="e.g. TRK-123456789"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="origin">Origin Warehouse</Label>
+                    <Select 
+                      value={newShipment.origin_id} 
+                      onValueChange={(val) => setNewShipment({...newShipment, origin_id: val})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select origin...">
+                          {newShipment.origin_id ? warehouses.find(w => w.id === newShipment.origin_id)?.name : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {warehouses.map((w) => (
+                          <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="destination">Destination Warehouse</Label>
+                    <Select 
+                      value={newShipment.destination_id} 
+                      onValueChange={(val) => setNewShipment({...newShipment, destination_id: val})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select destination...">
+                          {newShipment.destination_id ? warehouses.find(w => w.id === newShipment.destination_id)?.name : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {warehouses.map((w) => (
+                          <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="carrier">Carrier</Label>
+                    <Select 
+                      value={newShipment.carrier_id} 
+                      onValueChange={(val) => setNewShipment({...newShipment, carrier_id: val})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select carrier...">
+                          {newShipment.carrier_id ? carriers.find(c => c.id === newShipment.carrier_id)?.name : undefined}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {carriers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <DialogFooter>
