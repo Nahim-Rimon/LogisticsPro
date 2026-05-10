@@ -6,20 +6,18 @@ import { Package, Truck, Warehouse, Globe, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchWithAuth } from "@/lib/api";
+import { useOrgGuard } from "@/lib/useOrgGuard";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [upcomingMilestones, setUpcomingMilestones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
+  const ready = useOrgGuard();
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
+    if (!ready) return;
 
     async function loadStats() {
       try {
@@ -50,7 +48,7 @@ export default function DashboardPage() {
     }
 
     loadStats();
-  }, [getToken]);
+  }, [ready, getToken]);
 
   return (
     <>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Show, UserButton } from "@clerk/nextjs";
+import { Show, UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Package,
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link className="flex items-center gap-2" href="/">
               <div className="bg-accent/10 p-1.5 rounded-md">
                 <Globe className="h-5 w-5 text-accent" />
-              </div> <UserButton />
+              </div>
               <span className="text-xl font-bold tracking-tight">LogisticsPro</span>
             </Link>
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="rounded-full">
@@ -61,7 +61,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             ))}
           </nav>
-          <div className="pt-6 mt-auto">
+          <div className="pt-6 mt-auto space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3 bg-bg border border-border/60 rounded-xl">
+              <OrganizationSwitcher
+                hidePersonal
+                afterCreateOrganizationUrl="/dashboard"
+                afterSelectOrganizationUrl="/dashboard"
+                appearance={{
+                  elements: {
+                    rootBox: "w-full",
+                    organizationSwitcherTrigger:
+                      "w-full flex items-center gap-3 p-0 bg-transparent border-0 rounded-none shadow-none hover:bg-transparent focus:ring-0 focus:shadow-none",
+                    organizationPreview: "gap-3",
+                    organizationPreviewMainIdentifier:
+                      "text-sm font-medium truncate font-sans",
+                    organizationPreviewSecondaryIdentifier:
+                      "text-xs text-text-muted font-sans",
+                    organizationSwitcherTriggerIcon: "text-text-muted",
+                  },
+                }}
+              />
+            </div>
             <div className="flex items-center gap-3 px-4 py-3 bg-bg border border-border/60 rounded-xl">
               <Show when="signed-in">
                 <UserButton />
@@ -97,7 +117,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </Link>
             ))}
           </nav>
-          <div className="pt-6 mt-auto">
+          <div className="pt-6 mt-auto space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3 bg-bg border border-border/60 rounded-xl">
+              <OrganizationSwitcher
+                hidePersonal
+                afterCreateOrganizationUrl="/dashboard"
+                afterSelectOrganizationUrl="/dashboard"
+                appearance={{
+                  elements: {
+                    rootBox: "w-full",
+                    organizationSwitcherTrigger:
+                      "w-full flex items-center gap-3 p-0 bg-transparent border-0 rounded-none shadow-none hover:bg-transparent focus:ring-0 focus:shadow-none",
+                    organizationPreview: "gap-3",
+                    organizationPreviewMainIdentifier:
+                      "text-sm font-medium truncate font-sans",
+                    organizationPreviewSecondaryIdentifier:
+                      "text-xs text-text-muted font-sans",
+                    organizationSwitcherTriggerIcon: "text-text-muted",
+                  },
+                }}
+              />
+            </div>
             <div className="flex items-center gap-3 px-4 py-3 bg-bg border border-border/60 rounded-xl">
               <Show when="signed-in">
 

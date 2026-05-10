@@ -4,13 +4,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Bell, 
-  Shield, 
-  Globe, 
+import {
+  Bell,
+  Shield,
+  Globe,
   Mail,
   Save
 } from "lucide-react";
+import InviteMembers from "@/components/InviteMembers";
 
 export default function SettingsPage() {
   return (
@@ -22,6 +23,8 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid gap-6">
+          <InviteMembers />
+
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">

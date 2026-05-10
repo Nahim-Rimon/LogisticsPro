@@ -32,6 +32,7 @@ import { Plus, Phone, Mail, Loader2, ChevronLeft, ChevronRight } from "lucide-re
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchWithAuth } from "@/lib/api";
+import { useOrgGuard } from "@/lib/useOrgGuard";
 
 export function TestPage() {
   const { userId } = useAuth(); // If this throws, ClerkProvider isn't wrapping this page
@@ -49,14 +50,11 @@ export default function CarriersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
+  const ready = useOrgGuard();
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
+    if (!ready) return;
 
     async function loadCarriers() {
       try {
@@ -72,7 +70,7 @@ export default function CarriersPage() {
     }
 
     loadCarriers();
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [ready, getToken]);
 
   const handleAddCarrier = async (e: React.FormEvent) => {
     e.preventDefault();
