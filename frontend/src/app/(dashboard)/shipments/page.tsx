@@ -34,6 +34,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchWithAuth } from "@/lib/api";
+import { useOrgGuard } from "@/lib/useOrgGuard";
 
 const statusColors: Record<string, string> = {
   'In Transit': 'bg-blue-100 text-blue-700 border-blue-200',
@@ -55,14 +56,11 @@ export default function ShipmentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
+  const ready = useOrgGuard();
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
+    if (!ready) return;
 
     async function loadData() {
       try {
@@ -84,7 +82,7 @@ export default function ShipmentsPage() {
     }
 
     loadData();
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [ready, getToken]);
 
   const handleAddShipment = async (e: React.FormEvent) => {
     e.preventDefault();

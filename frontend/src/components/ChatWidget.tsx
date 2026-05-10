@@ -26,7 +26,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { getToken } = useAuth();
+  const { getToken, orgId } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -40,6 +40,17 @@ export default function ChatWidget() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
+
+    if (!orgId) {
+      const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: input.trim(), timestamp: t },
+        { role: "assistant", content: "Please create or select an organisation first — I'm scoped to one tenant at a time.", timestamp: t },
+      ]);
+      setInput("");
+      return;
+    }
 
     const userMessage = input.trim();
     setInput("");

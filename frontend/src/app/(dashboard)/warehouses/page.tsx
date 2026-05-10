@@ -33,6 +33,7 @@ import { Plus, MapPin, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchWithAuth } from "@/lib/api";
+import { useOrgGuard } from "@/lib/useOrgGuard";
 
 export default function WarehousesPage() {
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -47,14 +48,11 @@ export default function WarehousesPage() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [forecast, setForecast] = useState<any>(null);
   const [isForecasting, setIsForecasting] = useState(false);
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
+  const ready = useOrgGuard();
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
+    if (!ready) return;
 
     async function loadWarehouses() {
       try {
@@ -70,7 +68,7 @@ export default function WarehousesPage() {
     }
 
     loadWarehouses();
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [ready, getToken]);
 
   const handleAddWarehouse = async (e: React.FormEvent) => {
     e.preventDefault();

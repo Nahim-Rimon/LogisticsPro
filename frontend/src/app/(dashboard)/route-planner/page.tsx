@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { fetchWithAuth } from "@/lib/api";
+import { useOrgGuard } from "@/lib/useOrgGuard";
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
@@ -20,14 +21,11 @@ export default function RoutePlannerPage() {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState<any>(null);
 
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
+  const ready = useOrgGuard();
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
+    if (!ready) return;
 
     async function loadShipments() {
       try {
@@ -43,7 +41,7 @@ export default function RoutePlannerPage() {
       }
     }
     loadShipments();
-  }, [getToken, isLoaded, isSignedIn]);
+  }, [ready, getToken]);
 
   const toggleSelection = (id: string) => {
     const next = new Set(selectedIds);

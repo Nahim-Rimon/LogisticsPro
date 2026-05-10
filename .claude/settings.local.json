@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"E:\\\\AI-Projects\\\\AI-powered Application\\\\LogisticsPro\\\\backend\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(xargs grep -l \"clerkMiddleware\")",
+      "Bash(\"e:/AI-Projects/AI-powered Application/LogisticsPro/backend/venv/Scripts/pip.exe\" install svix)",
+      "Bash(\"./venv/Scripts/python.exe\" -c \"import main; print\\('OK: main.py imports cleanly'\\); print\\('Routes:'\\); [print\\(' -', r.path\\) for r in main.app.routes]\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

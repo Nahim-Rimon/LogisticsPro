@@ -22,7 +22,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
   return (
 
     <html lang="en" suppressHydrationWarning>
@@ -32,7 +32,7 @@ export default async function RootLayout({
         <ClerkProvider dynamic>
           <ThemeProvider attribute="class" defaultTheme="light" themes={["light", "dark", "gray"]} disableTransitionOnChange>
             {children}
-            {userId && <ChatWidget />}
+            {userId && orgId && <ChatWidget />}
           </ThemeProvider>
         </ClerkProvider>
       </body>
